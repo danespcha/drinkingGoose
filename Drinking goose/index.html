@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script type="text/javascript" src="./gameLogic.js"></script>
+	<link href="./webStyles.css" rel="stylesheet">
+    <title>Goose Drink - NFC Edition</title>
+    
+</head>
+<body>
+ 
+    <div id="start-screen">
+        <img id="splashimg" src="./assets/splash.png">
+        <button class="btn btn-Gamestart" onclick="toggleGame()"> JUGAR </button>
+    </div>
+ 
+    <div id="setup-screen" class="hidden">
+        <h1>🍻 Jugadores</h1>
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="name-input" placeholder="Nombre...">
+            <button class="btn btn-add" style="width: auto;" onclick="addPlayer()">ADD</button>
+        </div>
+        <div id="player-display" style="margin: 20px 0; background: #16213e; padding: 15px; border-radius: 10px;"></div>
+        <button class="btn btn-config" onclick="toggleConfig(true)">⚙️ CONFIGURAR</button>
+        <button class="btn btn-start" onclick="startGame()">🚀 EMPEZAR</button>
+    </div>
+ 
+    <div id="config-screen" class="hidden">
+        <h1>⚙️ Config</h1>
+        <input type="number" id="config-total-squares" value="25">
+        <input type="number" id="rule-sq-input" placeholder="Casilla #">
+        <input type="text" id="rule-text-input" placeholder="Regla...">
+        <button class="btn btn-add" onclick="saveRule()">GUARDAR REGLA</button>
+        <div id="rules-list"></div>
+        <button class="btn btn-start" onclick="toggleConfig(false)">CERRAR</button>
+    </div>
+	<div id="utilsWindow" class="hidden">
+		<div id="mainUtilsWindow">
+			<button class="btn btn-start" onclick="wheelOfFortune()">Ruleta</button>
+			<button class="btn btn-start" onclick="drawDice()">Dado</button>
+			<button class="btn btn-start" onclick="openCoin()">Moneda</button>
+			<button class="btn btn-add" onclick="closeUtils()">Cerrar</button>
+		</div>
+	</div>
+    <div id="game-screen" class="hidden">
+    <div class="header-game">
+        <h3 id="turn-display"></h3>
+        <div class="utils" onclick="utils()">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </div>
+		
+	<div id="board-container">
+		<div id="board"></div>
+		</div>
+
+        <div class="controls">
+            <div id="action-text" style="color: #f1c40f; margin-bottom: 10px; font-weight: bold;">¡Lanza el dado!</div>
+            <button class="btn btn-start" onclick="takeTurn()">🎲 LANZAR DADO</button>
+        </div>
+
+		<div class="results" id="results">
+
+		</div>
+ 
+    </div>
+	<div class="dice-container" id="coin-overlay" style="display: none;">
+		<div id="coin" class="coin">
+			<div class="side heads"></div> 
+			<div class="side tails"></div>
+		</div>
+		
+		<button id="btn-spin-coin" class="btn btn-add" onclick="coinFlip()">Lanzar Moneda</button>
+		
+		<button id="closeCoin" class="btn btn-start hidden" onclick="closeCoin()">Cerrar</button>
+	</div>	
+	<div id="dice-overlay" class="dice-container" >
+		<div id="dice" class="dice">
+			<div class="face front">1</div>
+			<div class="face back">6</div>
+			<div class="face right">2</div>
+			<div class="face left">5</div>
+			<div class="face top">3</div>
+			<div class="face bottom">4</div>
+		</div>
+		<button id="launchDice" class="btn btn-add hidden" onclick="rollManualDice(event)">Lanzar Dado</button>
+		<button id="closeDice" class="btn btn-start hidden" onclick="closeDice()">X</button>
+	</div>
+	
+</body>
+</html>

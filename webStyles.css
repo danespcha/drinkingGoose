@@ -1,4 +1,7 @@
-
+/*
+	Look, this is a mess, I don't even know what is happening here, but if it works don't touch it, this is a mix of using IA and messing around with the code inspector on the browser...
+	I know, I know, I studied CSS almos 13 years ago, and 12 years passed without coding with CSS, so there is a lot of new things that I don't know about... Forgive me, please
+*/
         :root {
             --bg: #1a1a2e;
             --square: #16213e;
@@ -18,7 +21,10 @@
             padding: 10px;
             overflow-x: hidden;
         }
- 
+		h1 {
+			text-align: center;
+			width: 100%; /* Asegura que ocupe todo el ancho para poder centrar */
+		}
         .hidden { display: none !important; }
  
         #start-screen, #setup-screen, #config-screen, #game-screen { 
@@ -28,7 +34,6 @@
  
         #splashimg { width: 100%; border-radius: 12px; margin-bottom: 20px; }
  
-        /* Shared UI */
         input { padding: 12px; border-radius: 8px; border: none; font-size: 1rem; margin: 5px 0; width: 100%; box-sizing: border-box; }
         .btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; color: white; margin: 5px 0; transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
@@ -37,7 +42,6 @@
         .btn-Gamestart { background: #5f27cd; width: 100%; font-size: 1.2rem; }
         .btn-config { background: #34495e; width: 100%; }
  
-        /* BOARD & FLOW ANIMATION */
         #board-container { position: relative; width: 100%; }
         #board { 
             display: grid; 
@@ -46,17 +50,32 @@
             margin-bottom: 20px; 
             width: 100%; 
         }
+
         .square {
             aspect-ratio: 1 / 1; 
-            background-color: var(--square); 
+			background-color: #1a1a1a;
+            background-size: cover;
+			background-position: center;
+			background-repeat: no-repeat;
             border: 1px solid #0f3460;
             position: relative; 
             border-radius: 4px;
         }
-        .sq-num { position: absolute; top: 2px; left: 2px; opacity: 0.3; font-size: 0.7rem; }
+
+		.sq-num, .rule-display {
+			color: #ffffff;
+			z-index: 2;
+			position: relative;
+			text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+			opacity: 0.8;
+		}
+		.rule-display{
+			font-size:0.7rem;
+		}
+        .sq-num { position: absolute; top: 2px; left: 2px; opacity: 0.6; font-size: 0.7rem; }
  
         #board-container {
-			position: relative; /* CRÍTICO: Para que offsetTop/Left funcionen bien */
+			position: relative;
 		}
 
 		.player-pawn {
@@ -67,15 +86,15 @@
 			border: 2px solid white;
 			box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 			z-index: 100;
-			/* Usamos transform para que la animación sea más eficiente y suave */
+
 			transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
 						left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			pointer-events: none; /* Para que no interfiera con clicks en el tablero */
+			pointer-events: none; 
 		}
         .rule-item { background: #0f3460; padding: 10px; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; }
  
         .controls {
-            position: sticky; bottom: 10px; background: rgba(26, 26, 46, 0.95);
+            position: flex; bottom: 10px; background: rgba(26, 26, 46, 0.95);
             padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
             width: 100%; box-sizing: border-box;
         }
@@ -125,14 +144,14 @@
 		}
 		
 		.utils {
-			background: #444; /* Un gris más oscuro para que resalte el blanco */
+			background: #444; 
 			width: 20px;
-			height: 20px; /* Un poco más de altura para dar aire */
+			height: 20px; 
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
 			cursor: pointer;
-			padding: 20px; /* Añade un poco de espacio interno */
+			padding: 20px;
 			border-radius: 4px;
 		}
 
@@ -141,26 +160,24 @@
 			height: 3px;
 			background-color: white; 
 			border-radius: 5px;
-			display: block; /* Asegura que se comporte como bloque */
+			display: block;
 		}
 		
 		.header-game {
 			display: flex;
-			justify-content: space-between; /* Uno a la izquierda, otro a la derecha */
-			align-items: center;           /* Los centra verticalmente entre sí */
-			padding: 10px 20px;            /* Espacio para que no toquen los bordes */
-			width: 100%;                   /* Que ocupe todo el ancho disponible */
-			box-sizing: border-box;        /* Evita que el padding ensanche el div */
+			justify-content: space-between; 
+			align-items: center;          
+			padding: 10px 20px;         
+			width: 100%;                   
+			box-sizing: border-box;       
 		}
 
-		/* Opcional: Quita márgenes por defecto del h3 para que no descuadre */
 		#turn-display {
 			margin: 0;
+			color:#f1c40f;
 		}
 		
-/* Escenario estático: NO debe tener transformaciones */
 .dice-container {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -170,18 +187,15 @@
     z-index: 99999;
     justify-content: center;
     align-items: center;
-    /* Perspectiva aquí, pero sin rotaciones en este div */
     perspective: 1200px; 
 	flex-direction: column
 }
 
-/* El Cubo: El ÚNICO que debe girar */
 #dice {
     width: 60px;
     height: 60px;
     position: relative;
     transform-style: preserve-3d;
-    /* Estado inicial explícito */
     transform: rotateX(0deg) rotateY(0deg);
     transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
@@ -200,7 +214,6 @@
     font-weight: bold;
     border-radius: 10px;
 	color:black;
-    /* Evita que se vean las caras de atrás a través de las de delante */
     backface-visibility: visible; 
     box-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.5);
 }
@@ -222,7 +235,6 @@
     height: 150px;
     position: relative;
     transform-style: preserve-3d;
-    /* ESTO ES LO QUE HACE QUE SE VEA EL MOVIMIENTO */
     transition: transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -234,11 +246,8 @@
     backface-visibility: hidden;
     background-size: cover;
     background-position: center;
-    /* Sombra para dar profundidad */
     box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 5px 15px rgba(0,0,0,0.3);
 }
-
-/* Aplica aquí las rutas de tus imágenes */
 .heads {
     background-image: url('./assets/cara.png'); 
 }
@@ -248,7 +257,6 @@
     transform: rotateY(180deg);
 }
 
-/* Efecto de brillo metálico pasando por encima */
 .coin::after {
     content: "";
     position: absolute;
@@ -268,3 +276,163 @@
 .coin-jumping {
     animation: coinJump 2s ease-in-out;
 }
+
+/*.slot-window {
+    width: 80%;
+    height: 80px; 
+    border: 5px solid #ffd700;
+    border-radius: 10px;
+    background: white;
+    position: relative;
+    overflow: hidden; 
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+	
+
+}*/
+
+.reel {
+    display: flex;
+    flex-direction: column;
+    transition: transform;
+	transform: translateZ(0);
+	backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform;
+}
+
+.slot-item {
+	height: 80px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-bottom: 1px solid #ccc; 
+    margin: 0;
+	color:black;
+	font-weight:700;
+}
+
+.slot-pointer {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 15px solid #e74c3c;
+}
+
+
+#slot-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    
+    display: flex; 
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.slot-machine-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.slot-window {
+    width: 350px;
+    height: 80px;
+    background: white;
+    border: 5px solid #f1c40f;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 20px; 
+}
+
+.btn-width{
+	width:60%;
+}
+
+#notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 20000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.notification-card h2 {
+    font-size: 3rem;
+    color: #222;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.notification-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    border: 6px solid #f1c40f;
+    text-align: center;
+    
+    width: 90%; 
+    max-width: 500px; 
+    
+    max-height: 80vh;
+    overflow-y: auto; 
+
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    box-sizing: border-box;
+}
+
+.notification-card p {
+    font-size: 1.4rem;
+    color: #444;
+    margin-bottom: 30px;
+    
+    white-space: normal;     
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5; 
+}
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.div-buttons-rules{
+	display:flex;
+	justify-content: space-between;
+	width:100%;
+}
+
+.square {
+  
+    position: relative; /* Necesario para posicionar el número */
+    
+    /* Centrado total del contenido */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+	box-sizing: border-box; /* Evita que el padding sume tamaño extra */
+    overflow: hidden;
+}
+

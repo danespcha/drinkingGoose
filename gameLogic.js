@@ -1,32 +1,46 @@
-	const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+		const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         let players = [];
 		let diceIsSpinning = false;
         let currentPlayerIndex = 0;
         let totalSquares = 25;
+		let isNotClose = true;
 		let possiblerules=["Bebe 1", 
 		"Bebe 2", "Bebe 5", "Manda 1", 
 		"Manda 2", "Manda 5", "Reparte 5", 
 		"Reparte 10", "Reparte 15", "Bebe vaso entero", 
-		"Bebe medio vaso", "Bebe medio vaso tú y arrastra a alguien", 
+		"Bebe medio vaso", "Bebe medio vaso tú y arrastra a alguien", "Norma", "Norma", "Norma", "Mini juego", "Mini juego",
 		"Manda vaso entero", "Manda medio vaso", "Relax", "Relax especial, lo que te toque lo mandas", 
-		"Esclavo", "Minijuego", "Bebe, 5 vueltas y vuelve a beber", "Muerte, bebe 10 y empieza de 0",
+		"Esclavo", "Mini juego", "Bebe, 5 vueltas y vuelve a beber", "Muerte, bebe 10 y empieza de 0",
 		"Beben los hombres", "Beben las mujeres", "Bebe el más alto", "Bebe el más bajo", "Cara o cruz, si cara mandas vaso, si cruz bebes vaso",
-		"Recarga y bébete el vaso entero", "Tira el dado, bebe lo que saques", "Ruleta de la fortuna", "Todos beben 3", "Todos beben 5 menos tú"]
-        let rules = { 3: "Bebe 1", 6: "Manda 2", 13: "¡OCA! Salta a la 16", 22: "Todos beben" };
+		"Recarga y bébete el vaso entero", "Tira el dado, bebe lo que saques", "Ruleta de la fortuna", "Todos beben 3", "Todos beben 5 menos tú", "Muerte"]
+        let rules = { 3: "Bebe 1", 6: "Manda 2", 13: "Bebe 5", 22: "Todos beben" };
         const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#eccc68', '#70a1ff'];
+		const tileImages = [
+			'./assets/tiles/1.png', 
+			'./assets/tiles/2.png', 
+			'./assets/tiles/3.png', 
+			'./assets/tiles/4.png', 
+			'./assets/tiles/5.png'
+		];
  
+		//Function for showing up the board
+		
         function toggleGame() {
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('setup-screen').classList.remove('hidden');
         }
- 
+		
+		//Function to showing up the configuration screen
+		
         function toggleConfig(show) {
             document.getElementById('setup-screen').classList.toggle('hidden', show);
             document.getElementById('config-screen').classList.toggle('hidden', !show);
             if(show) updateRulesList();
         }
  
-        function addPlayer() {
+		//Function to add a new player
+ 
+        /*function addPlayer() {
             const input = document.getElementById('name-input');
             if (input.value.trim() !== "") {
                 players.push({ 
@@ -40,6 +54,48 @@
                 document.getElementById('player-display').innerHTML = players.map(p => `<div style="color:${p.color}">● ${p.name}</div>`).join('');
             }
         }
+		*/
+		
+		function updatePlayerList() {
+			document.getElementById('player-display').innerHTML = players.map((p, index) => `
+				<div class="player-entry" style="color:${p.color}; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+					<span>● ${p.name}</span>
+					<span onclick="removePlayer(${index})" style="color:red; cursor:pointer; font-weight:bold; margin-left:10px;">✖</span>
+				</div>
+			`).join('');
+		}
+		
+		function addPlayer() {
+			const input = document.getElementById('name-input');
+			if (input.value.trim() !== "") {
+				players.push({ 
+					name: input.value, 
+					pos: 0, 
+					color: colors[players.length % colors.length],
+					id: `pawn-${players.length}`, 
+					glasses: 0
+				});
+				input.value = "";
+				updatePlayerList(); // Llamamos a una función separada para refrescar la lista
+			}
+		}
+		
+		function removePlayer(index) {
+			// Eliminamos el jugador del array
+			players.splice(index, 1);
+			
+			// Recalculamos los IDs y colores de los que quedan para que no haya huecos raros (opcional)
+			players.forEach((p, idx) => {
+				p.id = `pawn-${idx}`;
+				p.color = colors[idx % colors.length];
+			});
+			
+			// Actualizamos la lista visual
+			updatePlayerList();
+		}
+		//Function to remove a Player
+		
+		//Function to display the dice
 		
 		function drawDice(){
 			const overlay = document.getElementById('dice-overlay');
@@ -47,28 +103,29 @@
 			document.getElementById('closeDice').classList.add('hidden');
 			document.getElementById('launchDice').classList.remove('hidden');
 			diceIsSpinning = false;
-			// Quitamos la transición para que el reset al "1" sea instantáneo e invisible
+			overlay.classList.remove('hidden');
+			
 			dice.style.transition = 'none';
 			dice.style.transform = 'rotateX(0deg) rotateY(0deg)';
 			
 			overlay.style.display = 'flex';
 			
 		}
+		
+		//Function to make the rotation of the dice
+		
 		async function rollManualDice(event) {
 			document.getElementById('closeDice').classList.add('hidden');
-			const btn = document.getElementById('closeDice');
-			if (btn) {
-				btn.style.display = 'none'; 
-				// Por si acaso, también la clase
-				btn.classList.add('hidden');
-			}
+			
+
+			document.getElementById('closeDice').classList.add('hidden');
+		
 			if (diceIsSpinning) return;
 			diceIsSpinning = true;
 			
 			const dice = document.getElementById('dice');
 			const die = Math.floor(Math.random() * 6) + 1;
-
-			// Coordenadas finales
+			// CSS Coords dictionary for positioning dice faces
 			const rotations = {
 				1: 'rotateX(0deg) rotateY(0deg)',
 				2: 'rotateX(0deg) rotateY(-90deg)',
@@ -77,29 +134,27 @@
 				5: 'rotateX(0deg) rotateY(90deg)',
 				6: 'rotateX(180deg) rotateY(0deg) rotateZ(180deg)'
 			};
-
-			// Vueltas extra para que el usuario vea el giro
+			//Making extra spins to seems like it is actually rotating until falling on a number
 			const extraSpinX = (Math.floor(Math.random() * 2) + 4) * 360;
 			const extraSpinY = (Math.floor(Math.random() * 2) + 4) * 360;
 
-			// Activar transición y aplicar giro total
+			//Applying soft transition and another final rotation to show the winning face
 			dice.style.transition = 'transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1.1)';
 			dice.style.transform = `rotateX(${extraSpinX}deg) rotateY(${extraSpinY}deg) ${rotations[die]}`;
 
-			// ESPERAR a que la animación de 1.5s termine
+			//Waiting for the css transition actually ends
 			await sleep(1600);
-
-			// PAUSA EXTRA: Para que el usuario vea el dado quieto antes del alert
+			
+			//An small pause to see the result
 			await sleep(400);
 			
-			btn.classList.remove('hidden');
-			btn.style.display = '';
+			document.getElementById('closeDice').classList.remove('hidden');
 			
-			// Opcional: Cerrar después del alert
 			
 			diceIsSpinning = false;
 		}
 		
+		//Function to close the dice overlay
 		function closeDice(){
 			const btn = document.getElementById('closeDice');
 			if (btn) {
@@ -107,23 +162,67 @@
 				btn.classList.add('hidden');
 			}
 			document.getElementById('launchDice').classList.add('hidden');
-			document.getElementById('dice-overlay').style.display = 'none';
+			document.getElementById('dice-overlay').classList.add('hidden');
 		}
+		
+		//Function to update the list that is shown up to the user
         function updateRulesList() {
             document.getElementById('rules-list').innerHTML = Object.entries(rules).map(([sq, txt]) => `
                 <div class="rule-item"><span>#${sq}: ${txt}</span><span onclick="deleteRule(${sq})" style="color:red">✖</span></div>
             `).join('');
         }
  
+		//Function to delete an user given rule
         function deleteRule(k) { delete rules[k]; updateRulesList(); }
+		
+		
+		//Function to autofil all the rules
+		function randomizeRules(){
+			const boardsize = document.getElementById('config-total-squares').value;
+			for(let i=1; i<boardsize; i++){
+				if(i==1){
+					rules[i] = possiblerules[Math.floor(Math.random()*possiblerules.length)];
+				}
+				else{
+					let norm;
+					let failed=true;
+					//This while is only for not repeating the same rule, so it is at least 3 squares without the same rule
+					while(failed){
+						norm = possiblerules[Math.floor(Math.random()*possiblerules.length)]
+						if (norm != rules[i-1] && norm != rules[i-2]){
+							rules[i]=norm;
+							failed=false;
+						}
+					}
+					
+				}
+			}
+			updateRulesList();
+		}
+		
+		//Function to add a rule to the list
         function saveRule() {
+			const boardsize = document.getElementById('config-total-squares').value;
             const sq = document.getElementById('rule-sq-input').value;
             const txt = document.getElementById('rule-text-input').value;
-            if(sq && txt) { rules[sq] = txt; updateRulesList(); }
+			//We keep the last square without rule, because the last one is only the finish
+			if(boardsize==sq){
+				alert("¡La última casilla no puede tener norma!");
+			}
+			else{
+				if(sq && txt) { rules[sq] = txt; updateRulesList(); }
+			}
         }
  
+		//Function to start the game, creating the pawns for every player
         function startGame() {
-            if (players.length === 0) return;
+			let lastlastTile='';
+			let lastTile = '';
+			let currentTile = '';
+            if (players.length === 0) {
+				alert("Añade al menos 1 jugador");
+				return;
+			}
             totalSquares = parseInt(document.getElementById('config-total-squares').value);
             document.getElementById('setup-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -131,26 +230,48 @@
             const board = document.getElementById('board');
             board.innerHTML = "";
             for (let i = 1; i <= totalSquares; i++) {
-                board.innerHTML += `<div class="square" id="sq-${i}"><span class="sq-num">${i}</span></div>`;
-                if (rules[i]) document.getElementById(`sq-${i}`).style.borderColor = "#f1c40f";
+				failed = true;
+				while(failed){
+					currentTile = tileImages[Math.floor(Math.random()*tileImages.length)]
+					if(currentTile!=lastTile && currentTile!=lastlastTile){
+						failed=false;
+						lastlastTile=lastTile;
+						lastTile=currentTile;
+					}
+				}
+				const backgroundStyle = `background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${currentTile}');`;
+				const ruleText = rules[i] ? rules[i] : "";
+                if (rules[i]){ 
+				
+					board.innerHTML += `
+						<div class="square" id="sq-${i}" style="${backgroundStyle}" onclick="showRule('REGLA', '${ruleText}', 1)">
+							<span class="sq-num">${i}</span>
+							<div class="rule-display">${ruleText}</div>
+						</div>`;
+				}
+				else{
+	                board.innerHTML += `<div class="square" id="sq-${i}" style="${backgroundStyle})"><span class="sq-num">${i}</span></div>`;
+				}
             }
  
-            // Inject Pawns into the container
             const container = document.getElementById('board-container');
             players.forEach((p, idx) => {
                 const pawn = document.createElement('div');
                 pawn.className = 'player-pawn';
                 pawn.id = p.id;
                 pawn.style.backgroundColor = p.color;
-                // Offset slightly so they don't overlap perfectly
+                // This is just a offset so when two or more players are on the same square they dont overlaps perfectly
                 pawn.style.marginTop = `${(idx * 4)}px`;
                 pawn.style.marginLeft = `${(idx * 4)}px`;
                 container.appendChild(pawn);
-                movePawn(p, 0); // Initialize off-board
+                movePawn(p, 0);
             });
+			
             updateTurnDisplay();
         }
- 
+		
+		
+		//Function to animate the movement of the pawns
         function movePawn(player, position) {
 			const pawn = document.getElementById(player.id);
 			if (!pawn) return;
@@ -165,38 +286,111 @@
 			const boardContainer = document.getElementById('board-container');
 
 			if (targetSquare && boardContainer) {
-				// Calculamos la posición del cuadrado respecto al contenedor del tablero
 				const top = targetSquare.offsetTop + (targetSquare.offsetHeight / 2) - 10;
 				const left = targetSquare.offsetLeft + (targetSquare.offsetWidth / 2) - 10;
 
-				// Aplicamos la posición
 				pawn.style.top = `${top}px`;
 				pawn.style.left = `${left}px`;
 			}
 		}
  
+		//MultiFunction to pop up different messages
+		function showRule(title, message, type) {
+			const overlay = document.getElementById('notification-overlay');
+			document.getElementById('notification-title').textContent = title;
+			document.getElementById('notification-text').textContent = message;
+			
+			overlay.classList.remove('hidden');
+			overlay.style.display = 'flex';
+			//The different types are for showing just an ok button (type 1) or resetGame and mainMenu buttons
+			if(type==1){
+
+				document.getElementById('closeNotification').classList.remove('hidden');
+			}
+			if(type==2){
+
+				document.getElementById('resetGame').classList.remove('hidden');
+				document.getElementById('mainMenu').classList.remove('hidden');
+			}
+		}
+		
+		//Function to close the notification mostle for type 1 popup
+		function closeNotification() {
+			document.getElementById('notification-overlay').classList.add('hidden');
+			document.getElementById('closeNotification').classList.add('hidden');
+
+		}
+		
+		//Function to reset the game, all pawns and stats (minus the glasses), so player doesn't need to return to main menu
+		function resetGame(){
+			document.getElementById('notification-overlay').classList.add('hidden');
+			document.getElementById('resetGame').classList.add('hidden');
+			document.getElementById('mainMenu').classList.add('hidden');
+			
+			currentPlayerIndex=0;
+			players.forEach((pl, index) => {
+				pl.pos=0;
+				movePawn(pl, 0);
+				updateTurnDisplay();
+			});
+		}
+		
+		//Function to close the current game and return to main menu, deleting all the pawns
+		function mainMenuReturn(){
+			document.getElementById('notification-overlay').classList.add('hidden');
+			document.getElementById('resetGame').classList.add('hidden');
+			document.getElementById('mainMenu').classList.add('hidden')
+			document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+			resetGame();
+			players.forEach(p => {
+				const existingPawn = document.getElementById(p.id);
+				if (existingPawn) {
+					existingPawn.remove(); // Esto elimina el DIV del peón del mapa
+				}
+			});
+		}
+		function mainMenuReturnUtils(){
+			document.getElementById('notification-overlay').classList.add('hidden');
+			document.getElementById('resetGame').classList.add('hidden');
+			document.getElementById('mainMenu').classList.add('hidden')
+			document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+			document.getElementById('utilsWindow').classList.add('hidden');
+			resetGame();
+			players.forEach(p => {
+				const existingPawn = document.getElementById(p.id);
+				if (existingPawn) {
+					existingPawn.remove(); // Esto elimina el DIV del peón del mapa
+				}
+			});
+			
+		}
+		
+		//Function to make every player turn
 		async function takeTurn() {
 			
+			//Showing the dice container
 			const diceContainer = document.getElementById('dice-overlay');
 			const dice = document.getElementById('dice');
 			const p = players[currentPlayerIndex];
 
-			// 1. PREPARACIÓN E INICIO DE ANIMACIÓN DEL DADO
-			// Resetear posición y modo para evitar conflictos con la utilidad manual
+			//Setting the dice and position
 			dice.dataset.mode = "auto"; 
 			dice.style.transition = 'none';
 			dice.style.transform = 'rotateX(0deg) rotateY(0deg)';
 			
-			// Mostrar el dado en el centro
+			//Rendering the dice in the center
+			diceContainer.classList.remove('hidden');
 			diceContainer.style.display = 'flex';
 			
-			// Pequeña pausa para que el navegador registre el reset antes de girar
+			//A little pause for the browser to actually set the reset
 			await sleep(50); 
 
-			// 2. LANZAMIENTO
+			//Getting the final result
 			const die = Math.floor(Math.random() * 6) + 1;
 			
-			// Configuración de caras (Z-axis corregido para el 6)
+			// CSS Coords dictionary for positioning dice faces
 			const rotations = {
 				1: 'rotateX(0deg) rotateY(0deg)',
 				2: 'rotateX(0deg) rotateY(-90deg)',
@@ -206,39 +400,37 @@
 				6: 'rotateX(180deg) rotateY(0deg) rotateZ(180deg)'
 			};
 
-			// Giros aleatorios potentes (mínimo 3 vueltas completas)
+			//Random spins to look like the dice is actually spinning to the final result
 			const extraSpinX = (Math.floor(Math.random() * 3) + 3) * 360; 
 			const extraSpinY = (Math.floor(Math.random() * 3) + 3) * 360; 
 
-			// Aplicar animación
+
 			dice.style.transition = 'transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 			dice.style.transform = `rotateX(${extraSpinX}deg) rotateY(${extraSpinY}deg) ${rotations[die]}`;
 
-			// Esperamos a que el dado termine de girar antes de mover el peón
+			//Waiting to the dice to end the animation to move the pawn
 			await sleep(1500);
 
-			// 3. OCULTAR DADO Y CALCULAR POSICIÓN
-			diceContainer.style.display = 'none';
+			//Hidding the dice and calculating the movement
+			diceContainer.classList.add('hidden');
 
 			let currentPos = p.pos;
 			let targetPos = currentPos + die;
 			let finalPos;
 
-			// Lógica de rebote
+			//In this game you have to arrive with the exact number to the end, so if you get a bigger number you come back the rest of the remaining movements
 			if (targetPos > totalSquares) {
 				finalPos = totalSquares - (targetPos - totalSquares);
 			} else {
 				finalPos = targetPos;
 			}
-
-			// 4. MOVIMIENTO VISUAL DEL PEÓN (CASILLA POR CASILLA)
-			// Movimiento hacia adelante (hasta la meta o el tope)
+			
+			//Moving the pawn, it iterates so it moves into every square
 			for (let i = currentPos + 1; i <= Math.min(targetPos, totalSquares); i++) {
 				movePawn(p, i);
 				await sleep(300); 
 			}
 
-			// Movimiento de rebote (hacia atrás si se pasó)
 			if (targetPos > totalSquares) {
 				for (let i = totalSquares - 1; i >= finalPos; i--) {
 					movePawn(p, i);
@@ -246,49 +438,59 @@
 				}
 			}
 
-			// Actualizar posición lógica del jugador
+
 			p.pos = finalPos; 
 
-			// 5. PROCESAR REGLAS DE LA CASILLA
+			//Rules processing
 			let msg = `${p.name} sacó ${die}. `;
 			if (rules[p.pos]) {
-				msg += rules[p.pos];
 				
-				// Ejecución de efectos especiales
+				//Showing the rule with the popup function
+				showRule("REGLA",rules[p.pos], 1);
+				
+				//Controlling special events
+				
+				//If the rule contains the word Muerte the pawn starts all over again
 				if (rules[p.pos].includes("Muerte")) {
 					p.pos = 0;
 					await sleep(500); // Pausa dramática antes de volver al inicio
 					movePawn(p, 0);
 				}
-				if (rules[p.pos].includes("Ruleta")) wheelOfFortune();
-				if (rules[p.pos].includes("dado")) diceDraw(); 
-				if (rules[p.pos].includes("cruz")) coinFlip();
+				//If the rule contains Rulete it launchs the slot minigame
+				if (rules[p.pos].includes("Ruleta")) openSlot();
+				//If the rule contains dado it launchs the dice minigame
+				if (rules[p.pos].includes("dado")) drawDice(); 
+				//If the rule contains cruz it launchs the coin minigame
+				if (rules[p.pos].includes("cruz")) openCoin();
+
 			}
 
 			document.getElementById('action-text').innerText = msg;
 
-			// 6. CONTROL DE FIN DE PARTIDA O CAMBIO DE TURNO
+			//Controlling end of game or next turn
 			if (p.pos === totalSquares) {
 				await sleep(500);
-				alert(`🏆 ¡ENHORABUENA! ${p.name} ha ganado.`);
-				location.reload();
+				showRule("GANADOR", `🏆 ¡ENHORABUENA! ${p.name} ha ganado.`, 2);
 			} else {
-				// Pasar al siguiente jugador
+	
 				currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-				// Pausa para que el jugador asimile dónde ha caído
 				await sleep(1000); 
 				updateTurnDisplay();
 			}
 		}
-		
+		//Function to bring up the utils screen so the player can return to main menu or use manually a minigame
 		function utils(){
 			document.getElementById('game-screen').classList.add('hidden');
 			document.getElementById('utilsWindow').classList.remove('hidden');
 		}
+		
+		//Function to hide the utils screen
 		function closeUtils(){
 			document.getElementById('game-screen').classList.remove('hidden');
 			document.getElementById('utilsWindow').classList.add('hidden');
 		}
+		
+		//Function to update the turn display so you can see where are every player and how many glasses had it drink
         function updateTurnDisplay() {
 			const p = players[currentPlayerIndex];
 			
@@ -320,43 +522,48 @@
 					</div>`;
 			});
 		}
+		
+		//Function to add a glass drank
 		function addGlass(player, isAdding){
 			if(isAdding){
 				players[player].glasses++;
 			}
 			else{
-				players[player].glasses--;
+				if (players[player].glasses!=0){
+					players[player].glasses--;
+				}
 			}
 			updateTurnDisplay();
 		}
 		
+		//Function to flip the coin
 		async function coinFlip() {
 			const coin = document.getElementById('coin');
 			
-			// 1. Nos aseguramos de que la transición esté activa
+			//Check if the transition is active
 			coin.style.transition = 'transform 2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
-			// 2. Decidir resultado
-			const esCara = Math.random() < 0.5;
-			const vueltas = 1800; // 5 vueltas
-			const rotacionFinal = esCara ? vueltas : vueltas + 180;
+			//Get the result and calculate the spins, making 5 turns and a hald in case it is tails
+			const isHeads = Math.random() < 0.5;
+			const flips = 1800; // 5 vueltas
+			const finalRotation = isHeads ? flips : flips + 180;
 
-			// 3. Aplicar el giro
-			// Importante: rotateY es para que gire como una moneda lanzada al aire
-			coin.style.transform = `rotateY(${rotacionFinal}deg)`;
+			//Applying the rotation
+			coin.style.transform = `rotateY(${finalRotation}deg)`;
 
-			// 4. Esperar a que termine (2 segundos del CSS + un poco más)
+			//Waiting for the animation to end
 			await new Promise(resolve => setTimeout(resolve, 2100));
 
-			// Mostrar botón de cierre...
+			//Showing the close button
 			document.getElementById('closeCoin').classList.remove('hidden');
 		}
 		
+		//Function to show the coin overlay
 		function openCoin() {
 			const overlay = document.getElementById('coin-overlay');
 			const coin = document.getElementById('coin');
 			
-			// Reset de estados
+			//Resetting the coin
 			coin.style.transition = 'none';
 			coin.style.transform = 'rotateY(0deg)';
 			document.getElementById('btn-spin-coin').classList.remove('hidden');
@@ -365,26 +572,97 @@
 			overlay.style.display = 'flex';
 		}
 		
+		//Function to close the coin overlay
 		function closeCoin() {
 			const overlay = document.getElementById('coin-overlay');
 			const btnClose = document.getElementById('closeCoin');
 			const coin = document.getElementById('coin');
 
-			// 1. Ocultamos el overlay principal
-			if (overlay) {
-				overlay.classList.add('hidden');
-			}
+			overlay.classList.add('hidden');
+			btnClose.classList.add('hidden');
 
-			// 2. Aseguramos que el botón de cerrar se oculte 
-			// para que no aparezca nada más abrir la próxima vez
-			if (btnClose) {
-				btnClose.classList.add('hidden');
-			}
-
-			// 3. Opcional: Resetear la moneda a su posición inicial sin animación
-			// Esto evita que el usuario vea un "salto" visual la próxima vez
+			//Resetting the coin so the next time it doesn't visually glitches
 			if (coin) {
 				coin.style.transition = 'none';
 				coin.style.transform = 'rotateY(0deg) rotateX(0deg)';
 			}
 		}
+		
+
+const SLOT_PRIZES = ["BEBE 15", "BEBE 20", "BEBE DOS VASOS (O UNO LLENITO)", "CÁLLATE", "ESCLAVO INVERTIDO", "VEGETAL", "UN TURNO OJOS CERRADOS", "REPARTE 30"];
+
+//Function to show the slot overlay
+function drawSlot() {
+    const reel = document.getElementById('slot-reel');
+    
+    // Safety Check: If the element doesn't exist yet, stop here
+    if (!reel) {
+        console.error("Error: 'slot-reel' element not found in the DOM.");
+        return;
+    }
+
+    reel.innerHTML = '';
+
+    const iterations = 5;
+    for (let i = 0; i < iterations; i++) {
+        SLOT_PRIZES.forEach(text => {
+            const div = document.createElement('div');
+            div.className = 'slot-item';
+            div.textContent = text;
+            reel.appendChild(div);
+        });
+    }
+    
+    console.log("Slot reel populated with " + reel.children.length + " items.");
+}
+
+async function spinSlot() {
+    const reel = document.getElementById('slot-reel');
+    const btnSpin = document.getElementById('btn-spin-slot');
+    const itemHeight = 80; // Your CSS height
+    
+
+    // We start at the height of one full set of prizes so there's content above
+    const startingOffset = SLOT_PRIZES.length * itemHeight;
+    
+    reel.style.transition = 'none';
+    reel.style.transform = `translateY(-${startingOffset}px)`;
+
+    //Forcing reflow
+    reel.offsetHeight; 
+
+    //Setting up the transition
+    reel.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.1, 1)';
+
+    //Calculate the result
+    const winnerIndex = Math.floor(Math.random() * SLOT_PRIZES.length);
+    
+    //Spin 4 times, is long enought to see like random without running out of text
+    const setsToSpin = 4; 
+    const finalOffset = (setsToSpin * SLOT_PRIZES.length + winnerIndex) * itemHeight;
+
+    //Starting the animation
+    reel.style.transform = `translateY(-${finalOffset}px)`;
+
+    //Waiting for the animation to end
+    await new Promise(resolve => setTimeout(resolve, 4100));
+
+    //Showing up the close button
+    document.getElementById('closeSlot').classList.remove('hidden');
+}
+
+//Function to open the slot and calling for drawing the actual slot
+function openSlot() {
+    document.getElementById('slot-overlay').classList.remove('hidden');
+    document.getElementById('slot-reel').style.transition = 'none'; // Reset sin que se vea
+    document.getElementById('slot-reel').style.transform = 'translateY(0)';
+    drawSlot();
+}
+
+
+//Function to close the slot
+function closeSlot(){
+	 document.getElementById('slot-overlay').classList.add('hidden');
+	    document.getElementById('closeSlot').classList.add('hidden');
+
+}

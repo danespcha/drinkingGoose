@@ -16,31 +16,37 @@
     </div>
  
     <div id="setup-screen" class="hidden">
-        <h1>🍻 Jugadores</h1>
+        <h1>🫂 Jugadores 🫂</h1>
         <div style="display: flex; gap: 5px;">
             <input type="text" id="name-input" placeholder="Nombre...">
-            <button class="btn btn-add" style="width: auto;" onclick="addPlayer()">ADD</button>
+            <button class="btn btn-add" style="width: auto;" onclick="addPlayer()">+</button>
         </div>
         <div id="player-display" style="margin: 20px 0; background: #16213e; padding: 15px; border-radius: 10px;"></div>
-        <button class="btn btn-config" onclick="toggleConfig(true)">⚙️ CONFIGURAR</button>
-        <button class="btn btn-start" onclick="startGame()">🚀 EMPEZAR</button>
+        <button class="btn btn-config" onclick="toggleConfig(true)">⚙️ CONFIGURAR ⚙️</button>
+        <button class="btn btn-start" onclick="startGame()"> 🍺 EMPEZAR 🍺</button>
     </div>
  
     <div id="config-screen" class="hidden">
-        <h1>⚙️ Config</h1>
+        <h1>⚙️ Config️uración ⚙️</h1>
         <input type="number" id="config-total-squares" value="25">
         <input type="number" id="rule-sq-input" placeholder="Casilla #">
         <input type="text" id="rule-text-input" placeholder="Regla...">
-        <button class="btn btn-add" onclick="saveRule()">GUARDAR REGLA</button>
+		<div class="div-buttons-rules">
+			<button class="btn btn-add" onclick="randomizeRules()">AUTORRELLENAR</BUTTON>
+			<button class="btn btn-add" onclick="saveRule()">GUARDAR REGLA</button>
+		</div>
         <div id="rules-list"></div>
         <button class="btn btn-start" onclick="toggleConfig(false)">CERRAR</button>
     </div>
 	<div id="utilsWindow" class="hidden">
 		<div id="mainUtilsWindow">
-			<button class="btn btn-start" onclick="wheelOfFortune()">Ruleta</button>
+			<button class="btn btn-start" onclick="openSlot()">Ruleta</button>
 			<button class="btn btn-start" onclick="drawDice()">Dado</button>
 			<button class="btn btn-start" onclick="openCoin()">Moneda</button>
+			<button id = "mainMenuUtils" class="btn btn-start" onclick="mainMenuReturnUtils()">Menú principal</button>
 			<button class="btn btn-add" onclick="closeUtils()">Cerrar</button>
+
+
 		</div>
 	</div>
     <div id="game-screen" class="hidden">
@@ -52,7 +58,17 @@
             <div class="bar"></div>
         </div>
     </div>
+	<div id="notification-overlay" class="overlay-container hidden">
+    <div class="notification-card">
+        <h2 id="notification-title">REGLA</h2>
+        <p id="notification-text">La descripción de la norma va aqui.</p>
+        <button id = "closeNotification" class="btn btn-add btn-width hidden" onclick="closeNotification()">OK</button>
 		
+        <button id = "resetGame" class="btn btn-add btn-width hidden" onclick="resetGame()">Volver a jugar</button>
+		<button id = "mainMenu" class="btn btn-start btn-width hidden" onclick="mainMenuReturn()">Menú principal</button>
+
+    </div>
+	</div>
 	<div id="board-container">
 		<div id="board"></div>
 		</div>
@@ -77,7 +93,7 @@
 		
 		<button id="closeCoin" class="btn btn-start hidden" onclick="closeCoin()">Cerrar</button>
 	</div>	
-	<div id="dice-overlay" class="dice-container" >
+	<div id="dice-overlay" class="dice-container hidden" >
 		<div id="dice" class="dice">
 			<div class="face front">1</div>
 			<div class="face back">6</div>
@@ -87,7 +103,19 @@
 			<div class="face bottom">4</div>
 		</div>
 		<button id="launchDice" class="btn btn-add hidden" onclick="rollManualDice(event)">Lanzar Dado</button>
-		<button id="closeDice" class="btn btn-start hidden" onclick="closeDice()">X</button>
+		<button id="closeDice" class="btn btn-start hidden" onclick="closeDice()">Cerrar</button>
+	</div>
+	
+	<div id="slot-overlay" class="dice-container hidden">
+		<div class="slot-machine">
+			<div class="slot-window">
+				<div id="slot-reel" class="reel"></div>
+				<div class="slot-pointer"></div>
+			</div>
+		</div>
+
+		<button id="btn-spin-slot" class="btn btn-add btn-width" onclick="spinSlot()">¡Girar!</button>
+		<button id="closeSlot" class="btn btn-start btn-width hidden" onclick="closeSlot()">Cerrar</button>
 	</div>
 	
 </body>

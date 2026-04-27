@@ -28,14 +28,23 @@
  
     <div id="config-screen" class="hidden">
         <h1>⚙️ Config️uración ⚙️</h1>
+		<h2 id="rules-Title">Reglas del tablero</h2>
         <input type="number" id="config-total-squares" value="25">
         <input type="number" id="rule-sq-input" placeholder="Casilla #">
         <input type="text" id="rule-text-input" placeholder="Regla...">
 		<div class="div-buttons-rules">
 			<button class="btn btn-add" onclick="randomizeRules()">AUTORRELLENAR</BUTTON>
-			<button class="btn btn-add" onclick="saveRule()">GUARDAR REGLA</button>
+			<button class="btn btn-add" onclick="saveRule(1)">GUARDAR REGLA</button>
 		</div>
-        <div id="rules-list"></div>
+        
+		<div id="rules-list"></div>
+		<h2 id="wheelRules-Title">Reglas de la ruleta</h2>
+		<input type="text" id="wheelRule-text-input" placeholder="Regla de ruleta...">
+		<div class="div-buttons-wheelRules">
+			<button class="btn btn-add" onclick="saveRule(2)">GUARDAR REGLA</button>
+		</div>
+		<div id="wheelRules-list"></div>
+		
         <button class="btn btn-start" onclick="toggleConfig(false)">CERRAR</button>
     </div>
 	<div id="utilsWindow" class="hidden">

@@ -22,6 +22,7 @@
 			'./assets/tiles/4.png', 
 			'./assets/tiles/5.png'
 		];
+		let wheelRules = ["BEBE 15", "BEBE 20", "BEBE DOS VASOS (O UNO LLENITO)", "CÁLLATE", "ESCLAVO INVERTIDO", "VEGETAL", "UN TURNO OJOS CERRADOS", "REPARTE 30"];
  
 		//Function for showing up the board
 		
@@ -124,7 +125,8 @@
 			diceIsSpinning = true;
 			
 			const dice = document.getElementById('dice');
-			const die = Math.floor(Math.random() * 6) + 1;
+			let die = 0;
+			die = Math.floor(Math.random() * 6) + 1;
 			// CSS Coords dictionary for positioning dice faces
 			const rotations = {
 				1: 'rotateX(0deg) rotateY(0deg)',
@@ -168,12 +170,23 @@
 		//Function to update the list that is shown up to the user
         function updateRulesList() {
             document.getElementById('rules-list').innerHTML = Object.entries(rules).map(([sq, txt]) => `
-                <div class="rule-item"><span>#${sq}: ${txt}</span><span onclick="deleteRule(${sq})" style="color:red">✖</span></div>
+                <div class="rule-item"><span>#${sq}: ${txt}</span><span onclick="deleteRule(${sq},1)" style="color:red">✖</span></div>
+            `).join('');
+			document.getElementById('wheelRules-list').innerHTML = Object.entries(wheelRules).map(([sq, txt]) => `
+                <div class="rule-item"><span>#${sq}: ${txt}</span><span onclick="deleteRule(${sq},2)" style="color:red">✖</span></div>
             `).join('');
         }
  
 		//Function to delete an user given rule
-        function deleteRule(k) { delete rules[k]; updateRulesList(); }
+        function deleteRule(k,m) { 
+			if(m == 1){
+				delete rules[k];
+			}
+			if(m == 2){
+				delete wheelRules[k];
+			}
+			updateRulesList(); 
+		}
 		
 		
 		//Function to autofil all the rules
@@ -201,16 +214,22 @@
 		}
 		
 		//Function to add a rule to the list
-        function saveRule() {
-			const boardsize = document.getElementById('config-total-squares').value;
-            const sq = document.getElementById('rule-sq-input').value;
-            const txt = document.getElementById('rule-text-input').value;
-			//We keep the last square without rule, because the last one is only the finish
-			if(boardsize==sq){
-				alert("¡La última casilla no puede tener norma!");
+        function saveRule(m) {
+			if(m == 1){
+				const boardsize = document.getElementById('config-total-squares').value;
+				const sq = document.getElementById('rule-sq-input').value;
+				const txt = document.getElementById('rule-text-input').value;
+				//We keep the last square without rule, because the last one is only the finish
+				if(boardsize==sq){
+					alert("¡La última casilla no puede tener norma!");
+				}
+				else{
+					if(sq && txt) { rules[sq] = txt; updateRulesList(); }
+				}
 			}
-			else{
-				if(sq && txt) { rules[sq] = txt; updateRulesList(); }
+			if(m == 2){
+				wheelRules.push(document.getElementById('wheelRule-text-input').value)
+				updateRulesList();
 			}
         }
  
@@ -296,22 +315,28 @@
  
 		//MultiFunction to pop up different messages
 		function showRule(title, message, type) {
-			const overlay = document.getElementById('notification-overlay');
-			document.getElementById('notification-title').textContent = title;
-			document.getElementById('notification-text').textContent = message;
-			
-			overlay.classList.remove('hidden');
-			overlay.style.display = 'flex';
-			//The different types are for showing just an ok button (type 1) or resetGame and mainMenu buttons
-			if(type==1){
+			return new Promise((resolve)=>{
+				const overlay = document.getElementById('notification-overlay');
+				document.getElementById('notification-title').textContent = title;
+				document.getElementById('notification-text').textContent = message;
+				
+				overlay.classList.remove('hidden');
+				overlay.style.display = 'flex';
+				//The different types are for showing just an ok button (type 1) or resetGame and mainMenu buttons
+				if(type==1){
 
-				document.getElementById('closeNotification').classList.remove('hidden');
-			}
-			if(type==2){
+					document.getElementById('closeNotification').classList.remove('hidden');
+				}
+				if(type==2){
 
-				document.getElementById('resetGame').classList.remove('hidden');
-				document.getElementById('mainMenu').classList.remove('hidden');
-			}
+					document.getElementById('resetGame').classList.remove('hidden');
+					document.getElementById('mainMenu').classList.remove('hidden');
+				}
+				document.getElementById('closeNotification').onclick = () => {
+					closeNotification();
+					resolve();     // ¡Esto es lo que desbloquea el 'await'!
+				};
+			});
 		}
 		
 		//Function to close the notification mostle for type 1 popup
@@ -388,7 +413,8 @@
 			await sleep(50); 
 
 			//Getting the final result
-			const die = Math.floor(Math.random() * 6) + 1;
+			let die = 0;
+			die = Math.floor(Math.random() * 6) + 1;
 			
 			// CSS Coords dictionary for positioning dice faces
 			const rotations = {
@@ -446,22 +472,24 @@
 			if (rules[p.pos]) {
 				
 				//Showing the rule with the popup function
-				showRule("REGLA",rules[p.pos], 1);
+				await showRule("REGLA",rules[p.pos], 1);
 				
 				//Controlling special events
 				
 				//If the rule contains the word Muerte the pawn starts all over again
-				if (rules[p.pos].includes("Muerte")) {
+				if (rules[p.pos].toLowerCase().includes("muerte")) {
 					p.pos = 0;
-					await sleep(500); // Pausa dramática antes de volver al inicio
+					await sleep(500); 
 					movePawn(p, 0);
+					currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+					updateTurnDisplay();
 				}
 				//If the rule contains Rulete it launchs the slot minigame
-				if (rules[p.pos].includes("Ruleta")) openSlot();
+				if (rules[p.pos].toLowerCase().includes("ruleta")) openSlot();
 				//If the rule contains dado it launchs the dice minigame
-				if (rules[p.pos].includes("dado")) drawDice(); 
+				if (rules[p.pos].toLowerCase().includes("dado")) drawDice(); 
 				//If the rule contains cruz it launchs the coin minigame
-				if (rules[p.pos].includes("cruz")) openCoin();
+				if (rules[p.pos].toLowerCase().includes("cruz")) openCoin();
 
 			}
 
@@ -589,7 +617,7 @@
 		}
 		
 
-const SLOT_PRIZES = ["BEBE 15", "BEBE 20", "BEBE DOS VASOS (O UNO LLENITO)", "CÁLLATE", "ESCLAVO INVERTIDO", "VEGETAL", "UN TURNO OJOS CERRADOS", "REPARTE 30"];
+
 
 //Function to show the slot overlay
 function drawSlot() {
@@ -603,9 +631,9 @@ function drawSlot() {
 
     reel.innerHTML = '';
 
-    const iterations = 5;
+    const iterations = 12;
     for (let i = 0; i < iterations; i++) {
-        SLOT_PRIZES.forEach(text => {
+        wheelRules.forEach(text => {
             const div = document.createElement('div');
             div.className = 'slot-item';
             div.textContent = text;
@@ -623,7 +651,7 @@ async function spinSlot() {
     
 
     // We start at the height of one full set of prizes so there's content above
-    const startingOffset = SLOT_PRIZES.length * itemHeight;
+    const startingOffset = wheelRules.length * itemHeight;
     
     reel.style.transition = 'none';
     reel.style.transform = `translateY(-${startingOffset}px)`;
@@ -635,11 +663,11 @@ async function spinSlot() {
     reel.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.1, 1)';
 
     //Calculate the result
-    const winnerIndex = Math.floor(Math.random() * SLOT_PRIZES.length);
+    const winnerIndex = Math.floor(Math.random() * wheelRules.length);
     
     //Spin 4 times, is long enought to see like random without running out of text
     const setsToSpin = 4; 
-    const finalOffset = (setsToSpin * SLOT_PRIZES.length + winnerIndex) * itemHeight;
+    const finalOffset = (setsToSpin * wheelRules.length + winnerIndex) * itemHeight;
 
     //Starting the animation
     reel.style.transform = `translateY(-${finalOffset}px)`;
